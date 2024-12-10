@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mecanismo de Busca</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+        .mecanismo-de-busca {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+        }
+        .mecanismo-de-busca img {
+            width: 100%;
+            max-width: 250px; /* Ajuste a largura da imagem */
+            height: auto;
+            margin-bottom: 10px; /* Menos espaço entre a imagem e o campo de busca */
+        }
+        .barra-de-busca {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
+        }
+        .mecanismo-de-busca input[type="text"] {
+            width: 80%;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 18px;
+            margin-right: 10px; /* Espaço entre o campo de busca e o botão */
+            box-sizing: border-box;
+        }
+        .mecanismo-de-busca button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .mecanismo-de-busca button:hover {
+            background-color: #0056b3;
+        }
+        .lupa {
+            margin-left: 8px;
+        }
+        .resultados {
+            margin-top: 20px;
+            max-width: 600px;
+            text-align: left;
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+        @media (max-width: 768px) {
+            .mecanismo-de-busca input[type="text"], .mecanismo-de-busca button {
+                max-width: 90%;
+            }
+        }
+    </style>
+    <script>
+        // Dados em formato JSON
+        const data = {
+            "equipments": [
+                { "EquipmentID": "CMRP1", "EquipmentName": "Cortador Tampo Mesa Retangular Pequeno" },
+                { "EquipmentID": "CMRG1", "EquipmentName": "Cortador Tampo Mesa Retangular Grande" },
+                { "EquipmentID": "CTMQ1", "EquipmentName": "Cortador Tampo Mesa Quadrada" },
+                { "EquipmentID": "PFSD1", "EquipmentName": "Parafusador" },
+                { "EquipmentID": "MTLH1", "EquipmentName": "Martelo Hidráulico" },
+                { "EquipmentID": "MRTB1", "EquipmentName": "Marreta Biônica" },
+                { "EquipmentID": "PFSD2", "EquipmentName": "Parafusador 2" },
+                { "EquipmentID": "MDG1", "EquipmentName": "Montador de Gavetas" }
+            ],
+            "materials": [
+                { "MaterialID": "GVT", "MaterialName": "Gaveta" },
+                { "MaterialID": "MECAJA", "MaterialName": "Mesa com Cadeira Jantar" },
+                { "MaterialID": "ML3X2", "MaterialName": "Mesa Luxo 3m x 2m" },
+                { "MaterialID": "MQ1X1", "MaterialName": "Mesa Quadrada 1m x 1m" },
+                { "MaterialID": "MQ2X2", "MaterialName": "Mesa Quadrada 2m x 2m" },
+                { "MaterialID": "MQ3X3", "MaterialName": "Mesa Quadrada 3m x 3m" },
+                { "MaterialID": "MR1X-5", "MaterialName": "Mesa Retangular 1m x 50cm" },
+                { "MaterialID": "MR2X1", "MaterialName": "Mesa Retangular 2m x 1m" },
+                { "MaterialID": "MR3X1", "MaterialName": "Mesa Retangular 3m x 1m" },
+                { "MaterialID": "MR3X2", "MaterialName": "Mesa Retangular 3m x 2m" },
+                { "MaterialID": "MS2X3", "MaterialName": "Mesa Simples 2m x 3m" },
+                { "MaterialID": "PPM", "MaterialName": "Pé para Mesa" },
+                { "MaterialID": "PRF", "MaterialName": "Parafuso no 8" },
+                { "MaterialID": "PRG", "MaterialName": "Prego 10x10" },
+                { "MaterialID": "PXDGVT", "MaterialName": "Puxador Gaveta" },
+                { "MaterialID": "TMQ", "MaterialName": "Tampo para Mesa Quadrada" },
+                { "MaterialID": "TMR", "MaterialName": "Tampo para Mesa Retangular" },
+                { "MaterialID": "MR4X2", "MaterialName": "Mesa Retangular 4m x 2m" },
+                { "MaterialID": "MR5X2", "MaterialName": "Mesa Retangular 5m x 2m" }
+            ],
+            "purchaseOrders": [
+                { "PurchaseOrderID": 12289, "DeliveryDate": "10/03/2018", "Supplier": "Hatfan", "MaterialID": "TMR", "MaterialName": "Tampo para Mesa Retangular", "Quantity": 120, "TotalCost": 120 },
+                { "PurchaseOrderID": 12354, "DeliveryDate": "03/08/2018", "Supplier": "Streethex", "MaterialID": "TMQ", "MaterialName": "Tampo para Mesa Quadrada", "Quantity": 200, "TotalCost": 250 },
+                { "PurchaseOrderID": 12589, "DeliveryDate": "05/06/2018", "Supplier": "Inity", "MaterialID": "PRG", "MaterialName": "Prego 10x10", "Quantity": 1500, "TotalCost": 150 }
+            ],
+            "salesOrders": [
+                { "SalesOrderID": 20450, "DeliveryDate": "01/09/2018", "Customer": "Toughzap", "MaterialID": "MR2X1", "MaterialName": "Mesa Retangular 2m x 1m", "Quantity": 20, "TotalValue": 2000 },
+                { "SalesOrderID": 21200, "DeliveryDate": "03/08/2018", "Customer": "Zencorporation", "MaterialID": "MR3X2", "MaterialName": "Mesa Retangular 3m x 2m", "Quantity": 40, "TotalValue": 4000 }
+            ],
+            "workforce": [
+                { "WorkforceID": 1, "Name": "Aline Velasques", "Shift": "Turno A" },
+                { "WorkforceID": 2, "Name": "Danilo Inês", "Shift": "Turno B" }
+            ]
+        };
+
+        function realizarBusca() {
+            const termo = document.getElementById('pesquisa').value.toLowerCase();
+            const resultadosDiv = document.getElementById('resultados');
+            resultadosDiv.innerHTML = '<p>Buscando...</p>';
+            let resultados = [];
+
+            // Buscar nos equipamentos
+            data.equipments.forEach(item => {
+                if (item.EquipmentName.toLowerCase().includes(termo) || item.EquipmentID.toLowerCase().includes(termo)) {
+                    resultados.push({ tipo: 'Equipamento', nome: item.EquipmentName, id: item.EquipmentID });
+                }
+            });
+
+            // Buscar nos materiais
+            data.materials.forEach(item => {
+                if (item.MaterialName.toLowerCase().includes(termo) || item.MaterialID.toLowerCase().includes(termo)) {
+                    resultados.push({ tipo: 'Material', nome: item.MaterialName, id: item.MaterialID });
+                }
+            });
+
+            // Buscar nas ordens de compra
+            data.purchaseOrders.forEach(item => {
+                if (item.MaterialName.toLowerCase().includes(termo) || item.Supplier.toLowerCase().includes(termo)) {
+                    resultados.push({ tipo: 'Ordem de Compra', nome: item.MaterialName, id: item.PurchaseOrderID });
+                }
+            });
+
+            // Buscar nas ordens de venda
+            data.salesOrders.forEach(item => {
+                if (item.MaterialName.toLowerCase().includes(termo) || item.Customer.toLowerCase().includes(termo)) {
+                    resultados.push({ tipo: 'Ordem de Venda', nome: item.MaterialName, id: item.SalesOrderID });
+                }
+            });
+
+            // Buscar na força de trabalho
+            data.workforce.forEach(item => {
+                if (item.Name.toLowerCase().includes(termo)) {
+                    resultados.push({ tipo: 'Força de Trabalho', nome: item.Name, id: item.WorkforceID });
+                }
+            });
+
+            // Exibir resultados
+            if (resultados.length === 0) {
+                resultadosDiv.innerHTML = '<p>Nenhum resultado encontrado.</p>';
+            } else {
+                resultadosDiv.innerHTML = resultados.map(item => `
+                    <p><strong>${item.tipo}:</strong> ${item.nome} (ID: ${item.id})</p>
+                `).join('');
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="mecanismo-de-busca">
+        <img src="./imagens/logo_multisearch.png" alt="Logo">
+        <div class="barra-de-busca">
+            <input type="text" id="pesquisa" placeholder="Pesquisar..." onkeyup="realizarBusca()">
+            <button onclick="realizarBusca()"> <span class="lupa">🔍</span></button>
+        </div>
+        <div class="resultados" id="resultados"></div>
+    </div>
+</body>
+</html>
